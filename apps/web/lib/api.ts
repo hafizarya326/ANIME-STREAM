@@ -72,9 +72,7 @@ export interface EpisodeDetail {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3002/api/v1";
 const isServer = typeof window === "undefined";
 
-const defaultFetchOptions: RequestInit = isServer
-  ? { next: { revalidate: 60 } as any }
-  : {};
+const defaultFetchOptions: RequestInit = isServer ? { cache: "no-store" } : {};
 
 export interface ApiErrorBody {
   error?: {
@@ -99,6 +97,14 @@ const buildQuery = (params: Record<string, string | number | undefined>) => {
   });
   const query = search.toString();
   return query ? `?${query}` : "";
+};
+
+const encodeRouteId = (value: string) => {
+  try {
+    return encodeURIComponent(decodeURIComponent(value));
+  } catch {
+    return encodeURIComponent(value);
+  }
 };
 
 const parseError = async (res: Response): Promise<ApiErrorBody | null> => {
@@ -145,7 +151,7 @@ export const searchKuramanime = (q: string, page = 1) =>
   request<SearchResponse>(`/kuramanime/search${buildQuery({ q, page })}`);
 
 export const getKuramanimeAnimeDetail = (animeCompositeId: string) =>
-  request<AnimeDetail>(`/kuramanime/anime/${encodeURIComponent(animeCompositeId)}`);
+  request<AnimeDetail>(`/kuramanime/anime/${encodeRouteId(animeCompositeId)}`);
 
 export const getKuramanimeEpisodeDetail = (episodeCompositeId: string) =>
-  request<EpisodeDetail>(`/kuramanime/episode/${encodeURIComponent(episodeCompositeId)}`);
+  request<EpisodeDetail>(`/kuramanime/episode/${encodeRouteId(episodeCompositeId)}`);
