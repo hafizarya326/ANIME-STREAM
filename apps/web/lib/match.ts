@@ -1,4 +1,9 @@
-import { getKuramanimeAnimeDetail, searchKuramanime } from "./api";
+import {
+  getKuramanimeAnimeDetail,
+  getOploverzAnimeDetail,
+  searchKuramanime,
+  searchOploverz,
+} from "./api";
 
 const STOP_WORDS = ["sub", "indo", "subtitle", "indonesia", "season", "part", "tv", "movie"];
 
@@ -59,4 +64,29 @@ export const findBestKuramanimeId = async (otakudesuId: string, title: string) =
 
 export const getCachedKuramanimeDetail = async (kuramanimeId: string) => {
   return getKuramanimeAnimeDetail(kuramanimeId);
+};
+
+export const findBestOploverzEpisodeId = async (title: string, episodeNumber: string) => {
+  const searchRes = await searchOploverz(title);
+  const candidates = searchRes.data?.items ?? [];
+  let bestId: string | null = null;
+  let bestScore = 0;
+
+  for (const candidate of candidates) {
+    const score = scoreMatch(title, candidate.title);
+    const animeSlug = candidate.slug ?? candidate.id;
+    if (score <= bestScore || !animeSlug) continue;
+
+    const detail = await getOploverzAnimeDetail(animeSlug);
+    if (!detail.data) continue;
+    const episode = detail.data.episodes.find(
+      (item) => String(item.episodeNumber ?? "") === String(episodeNumber)
+    );
+    if (episode?.episodeId) {
+      bestScore = score;
+      bestId = episode.episodeId;
+    }
+  }
+
+  return bestId;
 };

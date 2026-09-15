@@ -1,5 +1,5 @@
-export type Source = "otakudesu" | "kuramanime";
-export const SOURCES: Source[] = ["otakudesu", "kuramanime"];
+export type Source = "otakudesu" | "kuramanime" | "oploverz";
+export const SOURCES: Source[] = ["otakudesu", "kuramanime", "oploverz"];
 export const DEFAULT_SOURCE: Source = "otakudesu";
 
 export const isValidSource = (value: string | null | undefined): value is Source =>
@@ -23,6 +23,9 @@ export interface Pagination {
 
 export interface AnimeItem {
   id: string;
+  animeId?: string;
+  animeSlug?: string;
+  slug?: string;
   title: string;
   poster: string | null;
   episodes: string | number | null;
@@ -155,3 +158,12 @@ export const getKuramanimeAnimeDetail = (animeCompositeId: string) =>
 
 export const getKuramanimeEpisodeDetail = (episodeCompositeId: string) =>
   request<EpisodeDetail>(`/kuramanime/episode/${encodeRouteId(episodeCompositeId)}`);
+
+export const searchOploverz = (q: string) =>
+  request<SearchResponse>(`/oploverz/search${buildQuery({ q })}`);
+
+export const getOploverzAnimeDetail = (animeSlug: string) =>
+  request<AnimeDetail>(`/oploverz/anime/${encodeRouteId(animeSlug)}`);
+
+export const getOploverzEpisodeDetail = (episodeSlug: string) =>
+  request<EpisodeDetail>(`/oploverz/episode/${encodeRouteId(episodeSlug)}`);

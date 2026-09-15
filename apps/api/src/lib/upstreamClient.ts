@@ -208,6 +208,8 @@ export const normalizeOngoing = (
   upstream: any
 ): OngoingAnimeResponse & { raw?: unknown } => {
   const list =
+    upstream?.data?.latestRelease?.animeList ??
+    upstream?.data?.popularToday?.animeList ??
     upstream?.data?.animeList ??
     upstream?.animeList ??
     upstream?.data ??
@@ -216,14 +218,13 @@ export const normalizeOngoing = (
 
   const items = Array.isArray(list)
     ? list.map((item: any) => {
-        const combinedId =
-          item?.animeSlug || item?.slug
-            ? `${item?.animeId ?? item?.id ?? ""}|${item?.animeSlug ?? item?.slug ?? ""}`
-            : null;
+        const itemSlug = item?.animeSlug ?? item?.slug;
+        const itemId = item?.animeId ?? item?.id;
+        const combinedId = itemSlug && itemId ? `${itemId}|${itemSlug}` : null;
         const id =
           combinedId ||
-          item?.id ||
-          item?.slug ||
+          itemSlug ||
+          itemId ||
           item?.animeId ||
           item?.anime_id ||
           item?.linkId ||
@@ -281,6 +282,7 @@ export const normalizeAnimeDetail = (upstream: any): AnimeDetail => {
     data?.episodeList ||
     data?.episodes_list ||
     data?.episodesData ||
+    details?.episodeList ||
     generatedEpisodes;
 
   const payload: AnimeDetail = {
@@ -301,7 +303,11 @@ export const normalizeAnimeDetail = (upstream: any): AnimeDetail => {
         : [],
     episodes: Array.isArray(episodesList)
       ? episodesList.map((ep: any) => ({
-          episodeId: ep?.episodeId || ep?.id || ep?.slug || "",
+          episodeId:
+            ep?.episodeId ||
+            ep?.id ||
+            ep?.slug ||
+            (ep?.href ? ep.href.split("/").filter(Boolean).pop() : ""),
           episodeNumber: ep?.episodeNumber ?? ep?.number ?? ep?.episode ?? ep?.eps ?? null,
           title: ep?.title ?? ep?.name ?? null,
           releaseDate: ep?.releaseDate ?? ep?.aired ?? ep?.uploadedOn ?? null,
@@ -331,6 +337,17 @@ export const normalizeEpisodeDetail = (upstream: any): EpisodeDetail => {
       }))
     ) ??
     [];
+  const oploverzDownloads = Array.isArray(details?.download)
+    ? details.download.flatMap((format: any) =>
+        (format?.qualityList ?? []).flatMap((quality: any) =>
+          (quality?.urlList ?? []).map((url: any) => ({
+            quality: quality?.title ?? format?.title ?? null,
+            provider: url?.title ?? null,
+            url: url?.url ?? null,
+          }))
+        )
+      )
+    : [];
   const streamingUrl =
     details?.streaming?.url ??
     details?.streamLink ??
@@ -344,13 +361,13 @@ export const normalizeEpisodeDetail = (upstream: any): EpisodeDetail => {
     streaming: {
       url: streamingUrl,
     },
-    downloads: Array.isArray(downloads)
+    downloads: Array.isArray(downloads) && downloads.length > 0
       ? downloads.map((dl: any) => ({
           quality: dl?.quality ?? dl?.title ?? dl?.resolution ?? null,
           provider: dl?.provider ?? dl?.server ?? dl?.title ?? null,
           url: dl?.url ?? dl?.link ?? null,
         }))
-      : [],
+      : oploverzDownloads,
   };
 
   if (!isProduction) {

@@ -9,10 +9,10 @@ import type { ResponseMeta } from "../types/api.js";
 const router = Router();
 const upstream = new UpstreamClient();
 const fallbackSourceEnv = process.env.FALLBACK_SOURCE_ON_FORBIDDEN;
-const fallbackSourceParse = z.enum(["otakudesu", "kuramanime"]).safeParse(fallbackSourceEnv);
+const fallbackSourceParse = z.enum(["otakudesu", "kuramanime", "oploverz"]).safeParse(fallbackSourceEnv);
 const fallbackSource = fallbackSourceParse.success ? fallbackSourceParse.data : undefined;
 
-const sourceSchema = z.enum(["otakudesu", "kuramanime"], {
+const sourceSchema = z.enum(["otakudesu", "kuramanime", "oploverz"], {
   required_error: "source is required",
 });
 const pageSchema = z.coerce.number().int().positive().default(1);
@@ -64,7 +64,12 @@ router.get("/:source/ongoing", cacheMiddleware, async (req: Request, res: Respon
 
     const normalized = await withFallback(
       source,
-      (src) => upstream.getJson<any>({ path: `/${src}/ongoing`, searchParams: { page }, source: src }),
+      (src) =>
+        upstream.getJson<any>({
+          path: src === "oploverz" ? "/oploverz/home" : `/${src}/ongoing`,
+          searchParams: src === "oploverz" ? undefined : { page },
+          source: src,
+        }),
       normalizeOngoing
     );
     return respond(res, normalized);
@@ -104,6 +109,8 @@ router.get("/:source/anime/:animeId", cacheMiddleware, async (req: Request, res:
   const upstreamPath =
     source === "kuramanime"
       ? `/${source}/anime/${animeId}/${animeSlug}`
+      : source === "oploverz"
+        ? `/${source}/anime/${animeIdRaw}`
       : `/${source}/anime/${animeId}`;
 
   try {
@@ -113,7 +120,10 @@ router.get("/:source/anime/:animeId", cacheMiddleware, async (req: Request, res:
       source,
       (src) =>
         upstream.getJson<any>({
-          path: src === "kuramanime" ? `/${src}/anime/${animeId}/${animeSlug}` : `/${src}/anime/${animeId}`,
+          path:
+            src === "kuramanime"
+              ? `/${src}/anime/${animeId}/${animeSlug}`
+              : `/${src}/anime/${animeId}`,
           source: src,
         }),
       normalizeAnimeDetail
@@ -149,6 +159,8 @@ router.get("/:source/episode/:episodeId", cacheMiddleware, async (req: Request, 
           path:
             src === "kuramanime"
               ? `/${src}/episode/${animeId}/${animeSlug}/${episodeId}`
+              : src === "oploverz"
+                ? `/${src}/episode/${episodeIdRaw}`
               : `/${src}/episode/${episodeId}`,
           source: src,
         }),

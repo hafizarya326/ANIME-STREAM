@@ -3,9 +3,10 @@ import type { AnimeEpisodeSummary } from "../lib/api";
 
 interface EpisodeListProps {
   episodes: AnimeEpisodeSummary[];
+  animeTitle?: string;
 }
 
-export function EpisodeList({ episodes }: EpisodeListProps) {
+export function EpisodeList({ episodes, animeTitle }: EpisodeListProps) {
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {episodes.map((ep) => (
@@ -23,7 +24,7 @@ export function EpisodeList({ episodes }: EpisodeListProps) {
             </p>
           </div>
           <Link
-            href={`/watch/${ep.episodeId}`}
+            href={`/watch/${ep.episodeId}?title=${encodeURIComponent(animeTitle ?? "")}&episode=${encodeURIComponent(String(ep.episodeNumber ?? ""))}`}
             className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-card"
           >
             Tonton

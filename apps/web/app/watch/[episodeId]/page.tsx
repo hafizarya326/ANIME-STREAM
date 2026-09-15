@@ -5,11 +5,15 @@ import { Breadcrumbs } from "../../../components/Breadcrumbs";
 import { DownloadList } from "../../../components/DownloadList";
 import { ErrorState } from "../../../components/ErrorState";
 import { SectionHeader } from "../../../components/SectionHeader";
-import { getKuramanimeEpisodeDetail } from "../../../lib/api";
+import { getKuramanimeEpisodeDetail, getOploverzEpisodeDetail } from "../../../lib/api";
+import { findBestOploverzEpisodeId } from "../../../lib/match";
 
 interface PageProps {
   params: { episodeId: string };
+  searchParams?: Record<string, string | string[]>;
 }
+
+const getParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const detail = await getKuramanimeEpisodeDetail(params.episodeId);
@@ -20,8 +24,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function WatchPage({ params }: PageProps) {
-  const episodeResult = await getKuramanimeEpisodeDetail(params.episodeId);
+export default async function WatchPage({ params, searchParams }: PageProps) {
+  const title = getParam(searchParams?.title) ?? "";
+  const episodeNumber = getParam(searchParams?.episode) ?? "";
+  const kuramanimeResult = await getKuramanimeEpisodeDetail(params.episodeId);
+  const oploverzEpisodeId = title && episodeNumber
+    ? await findBestOploverzEpisodeId(title, episodeNumber)
+    : null;
+  const oploverzResult = oploverzEpisodeId
+    ? await getOploverzEpisodeDetail(oploverzEpisodeId)
+    : null;
+  const episodeResult = oploverzResult?.data ? oploverzResult : kuramanimeResult;
 
   if (!episodeResult.data) {
     return (
@@ -61,7 +74,7 @@ export default async function WatchPage({ params }: PageProps) {
       <div className="flex flex-wrap items-center gap-3">
         <Badge>Episode</Badge>
         <h1 className="text-2xl font-bold text-white">{episodeTitle}</h1>
-        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">Sumber: kuramanime</span>
+        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">Stream: oploverz</span>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70">

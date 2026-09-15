@@ -101,7 +101,7 @@ export default async function AnimeDetailPage({ params, searchParams }: PageProp
         </div>
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300">
-            <span className="rounded-full bg-slate-800 px-3 py-1">Sumber: kuramanime</span>
+            <span className="rounded-full bg-slate-800 px-3 py-1">Judul: kuramanime</span>
             <span className="rounded-full bg-slate-800 px-3 py-1">
               {anime?.episodes.length ? `${anime.episodes.length} episode` : "Episode belum tersedia"}
             </span>
@@ -125,7 +125,7 @@ export default async function AnimeDetailPage({ params, searchParams }: PageProp
       <section className="space-y-3">
         <SectionHeader title="Daftar Episode" subtitle="Pilih episode untuk ditonton" />
         {episodes.length ? (
-          <EpisodeList episodes={episodes} />
+          <EpisodeList episodes={episodes} animeTitle={anime.title} />
         ) : (
           <div className="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4 text-sm text-slate-300">
             Episode belum tersedia untuk judul ini.
