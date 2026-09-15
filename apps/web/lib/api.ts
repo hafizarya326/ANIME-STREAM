@@ -167,3 +167,6 @@ export const getOploverzAnimeDetail = (animeSlug: string) =>
 
 export const getOploverzEpisodeDetail = (episodeSlug: string) =>
   request<EpisodeDetail>(`/oploverz/episode/${encodeRouteId(episodeSlug)}`);
+
+export const getNekokunEpisodeStream = (title: string, episode: string) =>
+  request<EpisodeDetail>(`/nekokun/episode${buildQuery({ title, episode })}`);

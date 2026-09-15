@@ -5,7 +5,11 @@ import { Breadcrumbs } from "../../../components/Breadcrumbs";
 import { DownloadList } from "../../../components/DownloadList";
 import { ErrorState } from "../../../components/ErrorState";
 import { SectionHeader } from "../../../components/SectionHeader";
-import { getKuramanimeEpisodeDetail, getOploverzEpisodeDetail } from "../../../lib/api";
+import {
+  getKuramanimeEpisodeDetail,
+  getNekokunEpisodeStream,
+  getOploverzEpisodeDetail,
+} from "../../../lib/api";
 import { findBestOploverzEpisodeId } from "../../../lib/match";
 
 interface PageProps {
@@ -28,13 +32,20 @@ export default async function WatchPage({ params, searchParams }: PageProps) {
   const title = getParam(searchParams?.title) ?? "";
   const episodeNumber = getParam(searchParams?.episode) ?? "";
   const kuramanimeResult = await getKuramanimeEpisodeDetail(params.episodeId);
+  const nekokunResult = title && episodeNumber
+    ? await getNekokunEpisodeStream(title, episodeNumber)
+    : null;
   const oploverzEpisodeId = title && episodeNumber
     ? await findBestOploverzEpisodeId(title, episodeNumber)
     : null;
   const oploverzResult = oploverzEpisodeId
     ? await getOploverzEpisodeDetail(oploverzEpisodeId)
     : null;
-  const episodeResult = oploverzResult?.data ? oploverzResult : kuramanimeResult;
+  const episodeResult = nekokunResult?.data
+    ? nekokunResult
+    : oploverzResult?.data
+      ? oploverzResult
+      : kuramanimeResult;
 
   if (!episodeResult.data) {
     return (
@@ -74,7 +85,9 @@ export default async function WatchPage({ params, searchParams }: PageProps) {
       <div className="flex flex-wrap items-center gap-3">
         <Badge>Episode</Badge>
         <h1 className="text-2xl font-bold text-white">{episodeTitle}</h1>
-        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">Stream: oploverz</span>
+        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300">
+          Stream: {nekokunResult?.data ? "nekokun" : oploverzResult?.data ? "oploverz" : "kuramanime"}
+        </span>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-800/70 bg-slate-900/70">

@@ -5,6 +5,7 @@ import { ApiError, formatError } from "../lib/errors.js";
 import { cache } from "../lib/cache.js";
 import { cacheMiddleware } from "../middleware/cache.js";
 import type { ResponseMeta } from "../types/api.js";
+import { getNekokunEpisode } from "../lib/nekokun.js";
 
 const router = Router();
 const upstream = new UpstreamClient();
@@ -35,6 +36,25 @@ router.get("/health", (_req, res) =>
     upstreamBaseUrl: upstream.getBaseUrl(),
   })
 );
+
+router.get("/nekokun/episode", async (req: Request, res: Response) => {
+  try {
+    const title = z.string().min(1).parse(req.query.title);
+    const episode = z.string().min(1).parse(req.query.episode);
+    const stream = await getNekokunEpisode(title, episode);
+    if (!stream) {
+      return res.status(404).json({
+        error: { code: "NOT_FOUND", message: "Episode stream tidak ditemukan di Nekokun", details: {} },
+      });
+    }
+    return res.json(stream);
+  } catch (error) {
+    const payload = formatError(error instanceof z.ZodError
+      ? new ApiError("BAD_REQUEST", "title and episode are required")
+      : error);
+    return res.status(mapStatus(payload.error.code)).json(payload);
+  }
+});
 
 router.get("/:source/diagnose", async (req: Request, res: Response) => {
   try {
