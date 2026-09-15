@@ -50,11 +50,15 @@ export const findBestKuramanimeId = async (otakudesuId: string, title: string) =
       bestScore = score;
       const rawId = item.animeId ?? item.id ?? "";
       const rawSlug = item.animeSlug ?? item.slug ?? "";
-      bestId = rawSlug ? `${rawId}|${rawSlug}` : rawId;
+      bestId = rawSlug
+        ? `${rawId}|${rawSlug}`
+        : rawId.includes("|")
+          ? rawId
+          : rawId;
     }
   });
 
-  if (bestId && bestScore >= 0.35) {
+  if (bestId && bestScore >= 0.15) {
     cache.set(otakudesuId, bestId);
     return { kuramanimeId: bestId, score: bestScore };
   }

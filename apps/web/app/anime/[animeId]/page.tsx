@@ -23,8 +23,8 @@ const getParam = (value?: string | string[]) => (Array.isArray(value) ? value[0]
 export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const fallbackTitle = getParam(searchParams?.title) ?? params.animeId;
   const mapping = await findBestKuramanimeId(params.animeId, fallbackTitle ?? "");
-  const targetId = mapping.kuramanimeId ?? params.animeId;
-  const detail = mapping.kuramanimeId
+  const targetId = mapping.kuramanimeId ?? (params.animeId.includes("|") ? params.animeId : null);
+  const detail = targetId
     ? await getKuramanimeAnimeDetail(targetId)
     : { data: null };
 
@@ -39,8 +39,10 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
 export default async function AnimeDetailPage({ params, searchParams }: PageProps) {
   const fallbackTitle = getParam(searchParams?.title) ?? params.animeId;
   const mapping = await findBestKuramanimeId(params.animeId, fallbackTitle ?? "");
+  const directKuramanimeId = params.animeId.includes("|") ? params.animeId : null;
+  const targetKuramanimeId = mapping.kuramanimeId ?? directKuramanimeId;
 
-  if (!mapping.kuramanimeId) {
+  if (!targetKuramanimeId) {
     return (
       <ErrorState
         message="Anime not available for streaming (Kuramanime match not found)."
@@ -56,7 +58,7 @@ export default async function AnimeDetailPage({ params, searchParams }: PageProp
     );
   }
 
-  const detailResult = await getKuramanimeAnimeDetail(mapping.kuramanimeId);
+  const detailResult = await getKuramanimeAnimeDetail(targetKuramanimeId);
 
   if (!detailResult.data) {
     return (
