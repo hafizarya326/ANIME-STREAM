@@ -77,4 +77,4 @@ If a source (e.g. otakudesu) blocks non-browser requests (HTTP 403):
 3. Optionally enable fallback: `FALLBACK_SOURCE_ON_FORBIDDEN=kuramanime` to auto-serve data from `kuramanime` when another source is blocked. Responses will include `meta.fallbackUsed`.
 4. Use diagnostics: `GET http://localhost:3002/api/v1/otakudesu/diagnose` to check upstream status and suggestions.
 5. Health check: `GET http://localhost:3002/api/v1/health` shows uptime and upstream base URL.
->>>>>>> 70c553c (first commit)
+
