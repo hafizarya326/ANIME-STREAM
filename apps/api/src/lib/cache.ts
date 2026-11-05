@@ -8,7 +8,11 @@ export const cache = new NodeCache({
   useClones: false,
 });
 
-export const buildCacheKey = (method: string, path: string, query?: Record<string, unknown>) => {
+export const buildCacheKey = (
+  method: string,
+  path: string,
+  query?: Record<string, unknown>,
+) => {
   const q = query ? JSON.stringify(query) : "";
   return `${method}:${path}:${q}`;
 };

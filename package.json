@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace apps/api\" \"npm run dev --workspace apps/web\"",
+    "dev:upstream": "npm run dev --prefix ../wajik-anime-api",
     "build": "npm run build --workspace apps/api && npm run build --workspace apps/web",
     "lint": "npm run lint --workspace apps/web",
     "format": "npm run format --workspace apps/api"

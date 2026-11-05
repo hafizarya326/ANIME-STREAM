@@ -3,7 +3,12 @@ node_modules
 dist
 .env
 *.log
+*.tsbuildinfo
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
 .DS_Store
+
+# Local backup folders
+_backup-2026-11-03/
+_backup-2026-11-04/

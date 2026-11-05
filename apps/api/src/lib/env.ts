@@ -1,4 +1,7 @@
-export const parseJsonEnv = <T>(value: string | undefined, label: string): T | Record<string, never> => {
+export const parseJsonEnv = <T>(
+  value: string | undefined,
+  label: string,
+): T | Record<string, never> => {
   if (!value) return {};
   try {
     const parsed = JSON.parse(value) as T;

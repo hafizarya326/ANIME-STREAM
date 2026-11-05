@@ -62,14 +62,17 @@ export const getNekokunEpisode = async (title: string, episode: string) => {
     const response = await fetch(`${NEKOKUN_BASE_URL}/${slug}/`, {
       headers: {
         Accept: "text/html,application/xhtml+xml",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
       },
       redirect: "follow",
     });
     if (!response.ok) continue;
 
     const html = await response.text();
-    const values = [...html.matchAll(/<option[^>]+value=["']([^"']+)["']/gi)].map((match) => match[1]);
+    const values = [
+      ...html.matchAll(/<option[^>]+value=["']([^"']+)["']/gi),
+    ].map((match) => match[1]);
     const streamUrl = values.map(decodeIframe).find(Boolean);
     if (streamUrl) {
       return {

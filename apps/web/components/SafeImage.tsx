@@ -1,6 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface SafeImageProps {
   src: string | null;
@@ -10,6 +11,11 @@ interface SafeImageProps {
 
 export function SafeImage({ src, alt, className }: SafeImageProps) {
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setHasError(false);
+  }, [src]);
+
   const resolvedSrc = !hasError && src ? src : "/placeholder.svg";
 
   return (
